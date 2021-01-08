@@ -1,15 +1,16 @@
 import os
 import sys
 import random
-
 import pygame
 
 
-pygame.init()   # инициализация
+# инициализация
+pygame.init()
 size = width, height = 471, 719
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption('Doodle jump')
 screen.fill((255, 255, 255))
+
 a = 0
 P = [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2]   # массив для выбора типа платформы
 MONSTER = ["Monster_1.png", "Monster_2.png", "Monster_3.png", "Monster_4.png"]  # массив с картинками для монстров
@@ -561,6 +562,10 @@ def death_screen():
 if __name__ == '__main__':
     PLATFORM = [Platform, PlatformMove, PlatformSpring, PlatformCrush]  # массив для выбора типа платформ
 
+    # изменение иконки
+    icon = load_image("icon.png")
+    pygame.display.set_icon(icon)
+
     # создание групп спрайтов
     all_sprites = pygame.sprite.Group()
     platforms = pygame.sprite.Group()
@@ -570,7 +575,7 @@ if __name__ == '__main__':
 
     start_screen()  # начальная заставка
     camera = Camera()   # создание камеры
-    vstavka = Vstavka() # создание вставки
+    vstavka = Vstavka()  # создание вставки
 
     #   основной цикл
     running = True
