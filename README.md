@@ -1,2 +1,1 @@
-# Doodle-jump
-My first project
+Это ветка со всеми изображениями спрайтов
