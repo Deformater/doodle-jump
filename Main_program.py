@@ -165,6 +165,8 @@ class Monster(pygame.sprite.Sprite):
 
         if pygame.sprite.spritecollideany(self, shells):
             monsters.remove(self)
+            self.platform.monster = None
+            self.platform = None
             del self
 
 
@@ -190,7 +192,7 @@ class Platform(pygame.sprite.Sprite):
                 a = random.randint(a - 304 + dude.rect.h + self.rect.h, a - self.rect.h - 1)
                 self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), a
 
-                if monster_random():
+                if monster_random() and self.monster is None:
                     self.monster = Monster(self)
         else:
             dude.spring = False
@@ -259,7 +261,7 @@ class PlatformMove(Platform):
                 a = random.randint(a - 304 + dude.rect.h + self.rect.h, a - self.rect.h - 1)
                 self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), a
 
-                if monster_random():
+                if monster_random() and self.monster is None:
                     self.monster = Monster(self)
 
             if self.rect.x + self.rect[2] >= width:
@@ -365,8 +367,11 @@ class Doodle(pygame.sprite.Sprite):
                     self.vertikal_speed = -14
                 pygame.sprite.spritecollideany(self, platforms).update(True)
 
-        if pygame.sprite.spritecollideany(self, monsters) and not self.spring:  # пересечение с монстрами
-            self.kill()
+        if pygame.sprite.spritecollideany(self, monsters):  # пересечение с монстрами
+            if not self.spring:
+                self.kill()
+            else:
+                monsters.remove(pygame.sprite.spritecollideany(self, monsters))
 
         if self.rect.y > height:    # выход за пределы поля
             self.kill()
