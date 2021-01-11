@@ -41,18 +41,17 @@ def load_image(name, colorkey=None):
 
 # функция для определения наличия монстра на платформе
 def monster_random():
-    return random.choice([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    return random.random() > 0.99
 
 
 # генерация платформ
 def generate():
     global a
-    x = Platform(width // 2, height - 25)
+    eczemplar = Platform(width // 2, height - 25)
     a = height - 26
     for i in range(random.randint(14, 18)):
-        a = random.randint(a - 304 + dude.rect.h + x.rect.h, a - x.rect.h - 1)
-        p = random.choice(P)
-        x = PLATFORM[p](random.randint(0, width - x.rect.w), a)
+        a = random.randint(a - 304 + dude.rect.h + eczemplar.rect.h, a - eczemplar.rect.h - 1)
+        eczemplar = PLATFORM[random.choice(P)](random.randint(0, width - eczemplar.rect.w), a)
 
 
 # класс синей вставки сверху поля
@@ -61,13 +60,15 @@ class Vstavka(pygame.sprite.Sprite):
 
     def __init__(self):
         super().__init__(all_sprites)
+
         self.image = Vstavka.image
         self.image.set_alpha(200)
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+
         self.score = Score()
         self.pause = Pause()
-        self.rect = self.image.get_rect()
-        # вычисляем маску для эффективного сравнения
-        self.mask = pygame.mask.from_surface(self.image)
+
         self.rect.x = 0
         self.rect.y = 0
 
@@ -78,9 +79,10 @@ class Pause(pygame.sprite.Sprite):
 
     def __init__(self):
         super().__init__(all_sprites)
+
         self.rect = self.image.get_rect()
-        # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
+
         self.rect.x = width - 50
         self.rect.y = 10
 
@@ -94,11 +96,12 @@ class Pause(pygame.sprite.Sprite):
 class Score(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(dezign)
+
         self.myFont = pygame.font.Font('DoodleJump.ttf', 30)
         self.myFont.bold = True
         self.fontImage = self.myFont.render(str(0), True, (0, 0, 0))
-        self.score = 0
         screen.blit(self.fontImage, (10, 5))
+        self.score = 0
 
     def update(self, *args):
         self.fontImage = self.myFont.render(str(camera.moving), True, (0, 0, 0))
@@ -137,10 +140,11 @@ class Background(pygame.sprite.Sprite):
 
     def __init__(self):
         super().__init__(all_sprites)
+
         self.image = Background.image
         self.rect = self.image.get_rect()
-        # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
+
         self.rect.x = 0
         self.rect.y = 0
 
@@ -150,12 +154,14 @@ class Monster(pygame.sprite.Sprite):
 
     def __init__(self, platform):
         super().__init__(monsters)
+
         image = load_image(random.choice(MONSTER), -1)  # выбор изображения для монстра
         self.image = image
         self.rect = self.image.get_rect()
-        # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
+
         self.platform = platform
+
         self.rect.x = self.platform.rect.x
         self.rect.y = self.platform.rect.y - self.rect.h
 
@@ -178,9 +184,10 @@ class Platform(pygame.sprite.Sprite):
         super().__init__(platforms)
         self.image = Platform.image
         self.rect = self.image.get_rect()
-        # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
+
         self.monster = None
+
         self.rect.x = x
         self.rect.y = y
 
@@ -204,9 +211,9 @@ class PlatformCrush(Platform):
 
     def __init__(self, x_coords, y_coords):
         super().__init__(x_coords, y_coords)
+
         self.image = PlatformCrush.image
         self.rect = self.image.get_rect()
-        # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self, arg=False):
@@ -323,18 +330,21 @@ class Doodle(pygame.sprite.Sprite):
 
     def __init__(self):
         super().__init__(all_sprites)
+
         self.image = Doodle.image
         self.rect = self.image.get_rect()
-        # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
+
         self.rect.x = width // 2
         self.rect.y = height - 25 - self.rect.h
         self.y = height - 10
+
         self.vertikal_speed = -14
         self.horizontal_speed = 4
         self.delta = 0
         self.a1 = 0.5
         self.a2 = 0.3
+
         self.flipness = 0
         self.spring = False
         self.motion = None
