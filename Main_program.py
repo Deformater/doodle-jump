@@ -11,8 +11,8 @@ screen = pygame.display.set_mode(size)
 pygame.display.set_caption('Doodle jump')
 screen.fill((255, 255, 255))
 
-a = 0
-P = [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2]   # массив для выбора типа платформы
+gen_coords = 0
+P_RANDOM = [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2]   # массив для выбора типа платформы
 MONSTER = ["Monster_1.png", "Monster_2.png", "Monster_3.png", "Monster_4.png"]  # массив с картинками для монстров
 clock = pygame.time.Clock()
 
@@ -46,12 +46,12 @@ def monster_random():
 
 # генерация платформ
 def generate():
-    global a
+    global gen_coords
     eczemplar = Platform(width // 2, height - 25)
-    a = height - 26
+    gen_coords = height - 26
     for i in range(random.randint(14, 18)):
-        a = random.randint(a - 304 + dude.rect.h + eczemplar.rect.h, a - eczemplar.rect.h - 1)
-        eczemplar = PLATFORM[random.choice(P)](random.randint(0, width - eczemplar.rect.w), a)
+        gen_coords = random.randint(gen_coords - 304 + dude.rect.h + eczemplar.rect.h, gen_coords - eczemplar.rect.h - 1)
+        eczemplar = PLATFORM[random.choice(P_RANDOM)](random.randint(0, width - eczemplar.rect.w), gen_coords)
 
 
 # класс синей вставки сверху поля
@@ -192,12 +192,12 @@ class Platform(pygame.sprite.Sprite):
         self.rect.y = y
 
     def update(self, arg=False):
-        global a
+        global gen_coords
         if not arg:
             if self.rect.y > height:
                 all_sprites.remove(self.monster)
-                a = random.randint(a - 304 + dude.rect.h + self.rect.h, a - self.rect.h - 1)
-                self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), a
+                gen_coords = random.randint(gen_coords - 304 + dude.rect.h + self.rect.h, gen_coords - self.rect.h - 1)
+                self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), gen_coords
 
                 if monster_random() and self.monster is None:
                     self.monster = Monster(self)
@@ -217,11 +217,11 @@ class PlatformCrush(Platform):
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self, arg=False):
-        global a
+        global gen_coords
         if not arg:
             if self.rect.y > height:
-                a = random.randint(a - 304 + dude.rect.h + self.rect.h, a - self.rect.h - 1)
-                self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), a
+                gen_coords = random.randint(gen_coords - 304 + dude.rect.h + self.rect.h, gen_coords - self.rect.h - 1)
+                self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), gen_coords
         else:
             platforms.remove(self)
             del self
@@ -238,11 +238,11 @@ class PlatformSpring(Platform):
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self, arg=False):
-        global a
+        global gen_coords
         if not arg:
             if self.rect.y > height:
-                a = random.randint(a - 304 + dude.rect.h + self.rect.h, a - self.rect.h - 1)
-                self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), a
+                gen_coords = random.randint(gen_coords - 304 + dude.rect.h + self.rect.h, gen_coords - self.rect.h - 1)
+                self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), gen_coords
         else:
             dude.vertikal_speed = -30
             dude.spring = True
@@ -261,12 +261,12 @@ class PlatformMove(Platform):
         self.monster = None
 
     def update(self, arg=False):
-        global a
+        global gen_coords
         if not arg:
             if self.rect.y > height:
                 all_sprites.remove(self.monster)
-                a = random.randint(a - 304 + dude.rect.h + self.rect.h, a - self.rect.h - 1)
-                self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), a
+                gen_coords = random.randint(gen_coords - 304 + dude.rect.h + self.rect.h, gen_coords - self.rect.h - 1)
+                self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), gen_coords
 
                 if monster_random() and self.monster is None:
                     self.monster = Monster(self)
@@ -350,7 +350,7 @@ class Doodle(pygame.sprite.Sprite):
         self.motion = None
 
     def update(self, *args):
-        global a
+        global gen_coords
 
         if args and args[0].type == pygame.MOUSEBUTTONDOWN:  # выстрел
             self.shoot(args[0].pos)
@@ -389,7 +389,7 @@ class Doodle(pygame.sprite.Sprite):
         if camera.dy - self.rect.y > 324:   # движение камеры
             self.delta = camera.dy - self.rect.y
             camera.update(self)
-            a += camera.delta
+            gen_coords += camera.delta
         self.movement_vertical()    # вертикальное движение
 
     def movement_vertical(self):    # вертикальное движение
@@ -468,6 +468,7 @@ def start_screen():
             elif event.type == pygame.KEYDOWN or \
                     event.type == pygame.MOUSEBUTTONDOWN:
                 return  # начинаем игру
+
         pygame.display.flip()
         clock.tick(60)
 
@@ -494,6 +495,7 @@ def pause_screen():
             elif event.type == pygame.KEYDOWN or \
                     event.type == pygame.MOUSEBUTTONDOWN:
                 return  # продолжаем игру
+
         pygame.display.flip()
         clock.tick(60)
 
@@ -568,7 +570,6 @@ def death_screen():
         screen.blit(string_rendered3, intro_rect3)
         screen.blit(string_rendered4, intro_rect4)
 
-        clock = pygame.time.Clock()
         clock.tick(60)
         pygame.display.flip()
 
