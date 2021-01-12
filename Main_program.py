@@ -421,19 +421,8 @@ class Doodle(pygame.sprite.Sprite):
         death_screen()
 
 
-# начальный экран
-def start_screen():
-    # инициализация основных объектов
-    global dude
-    Background()
-    dude = Doodle()
-    generate()
-
-    # отрисовка
-    all_sprites.draw(screen)
-    platforms.draw(screen)
-
-    # инициализация текста
+# инициализация текста для стартогого экрана
+def start_text_init():
     intro_text = ["Doodle jump",
                   "григорий муравенко",
                   "Click to start"]
@@ -459,6 +448,18 @@ def start_screen():
     intro_rect.x = 35
     screen.blit(string_rendered, intro_rect)
 
+
+# начальный экран
+def start_screen():
+    generate()
+
+    # отрисовка
+    all_sprites.draw(screen)
+    platforms.draw(screen)
+
+    # инициализация текста
+    start_text_init()
+
     while True:
         # обработка внешних событий
         for event in pygame.event.get():
@@ -473,9 +474,8 @@ def start_screen():
         clock.tick(60)
 
 
-# экран паузы
-def pause_screen():
-    # инициализация текста
+# инициализация текста для экрана паузы
+def pause_text_init():
     intro_text = ["Click to continue"]
     font = pygame.font.Font('DoodleJump.ttf', 30)
     font.bold = True
@@ -485,6 +485,12 @@ def pause_screen():
     intro_rect.y = 600
     intro_rect.x = (width - intro_rect.w) // 2
     screen.blit(string_rendered, intro_rect)
+
+
+# экран паузы
+def pause_screen():
+    # инициализация текста
+    pause_text_init()
 
     while True:
         # обработка внешних событий
@@ -500,19 +506,8 @@ def pause_screen():
         clock.tick(60)
 
 
-# экран конца игры
-def death_screen():
-    # занесение конечного результата в файл
-    f = open('BestScore.txt', 'r',  encoding="utf-8")
-    s = int(f.readline())
-    if s < vstavka.score.score:
-        s = vstavka.score.score
-    f.close()
-    f = open('BestScore.txt', 'w', encoding="utf-8")
-    f.write(str(s))
-    f.close()
-
-    # инициализация текста
+# инициализация текста для экрана смерти
+def death_text_init(s):
     intro_text = ['You died', 'your best score: ' + str(s),
                   'your score: ' + str(vstavka.score.score),
                   "Click to restart"]
@@ -542,6 +537,35 @@ def death_screen():
     intro_rect4.y = 600
     intro_rect4.x = (width - intro_rect4.w) // 2
     screen.blit(string_rendered4, intro_rect4)
+
+    return (string_rendered1, intro_rect1), (string_rendered2, intro_rect2),\
+           (string_rendered3, intro_rect3), (string_rendered4, intro_rect4)
+
+
+# занесение и чтение файла со счётом
+def score_save():
+    f = open('BestScore.txt', 'r', encoding="utf-8")
+    s = int(f.readline())
+    if s < vstavka.score.score:
+        s = vstavka.score.score
+    f.close()
+    f = open('BestScore.txt', 'w', encoding="utf-8")
+    f.write(str(s))
+    f.close()
+    return s
+
+
+# экран конца игры
+def death_screen():
+    # занесение конечного результата в файл
+    s = score_save()
+
+    # инициализация текста
+    text = death_text_init(s)
+    string_rendered1, intro_rect1 = text[0]
+    string_rendered2, intro_rect2 = text[1]
+    string_rendered3, intro_rect3 = text[2]
+    string_rendered4, intro_rect4 = text[3]
 
     # удаление голубой вставки
     all_sprites.remove(vstavka.pause)
@@ -589,8 +613,10 @@ if __name__ == '__main__':
     shells = pygame.sprite.Group()
     dezign = pygame.sprite.Group()
 
+    Background()
+    dude = Doodle()
     start_screen()  # начальная заставка
-    camera = Camera()   # создание камеры
+    camera = Camera()  # создание камеры
     vstavka = Vstavka()  # создание вставки
 
     #   основной цикл
