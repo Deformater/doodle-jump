@@ -47,8 +47,6 @@ def monster_random():
 
 # генерация платформ
 def generate():
-    global gen_coords
-
     eczemplar = Platform(width // 2, height - 25)
     gen_coords = height - 26
 
@@ -56,6 +54,8 @@ def generate():
         gen_coords = random.randint(gen_coords - 304 + dude.rect.h + eczemplar.rect.h,
                                     gen_coords - eczemplar.rect.h - 1)
         eczemplar = PLATFORM[random.choice(P_RANDOM)](random.randint(0, width - eczemplar.rect.w), gen_coords)
+
+    return gen_coords
 
 
 # класс синей вставки сверху поля
@@ -121,6 +121,7 @@ class Camera:
         self.dy = height
         self.delta = 0
         self.moving = 0
+        self.gen_coords = 0
 
     # сдвинуть объект obj на смещение камеры
     def apply(self, obj):
@@ -137,6 +138,8 @@ class Camera:
             camera.apply(dude)
             i += 1
             self.moving += 1
+
+        self.gen_coords += self.delta
 
 
 # класс заднего фона
@@ -197,12 +200,13 @@ class Platform(pygame.sprite.Sprite):
         self.rect.y = y
 
     def update(self, arg=False):
-        global gen_coords
         if not arg:
             if self.rect.y > height:
                 all_sprites.remove(self.monster)
-                gen_coords = random.randint(gen_coords - 304 + dude.rect.h + self.rect.h, gen_coords - self.rect.h - 1)
-                self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), gen_coords
+
+                camera.gen_coords = random.randint(camera.gen_coords - 304 + dude.rect.h + self.rect.h,
+                                                   camera.gen_coords - self.rect.h - 1)
+                self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), camera.gen_coords
 
                 if monster_random() and self.monster is None:
                     self.monster = Monster(self)
@@ -222,11 +226,11 @@ class PlatformCrush(Platform):
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self, arg=False):
-        global gen_coords
         if not arg:
             if self.rect.y > height:
-                gen_coords = random.randint(gen_coords - 304 + dude.rect.h + self.rect.h, gen_coords - self.rect.h - 1)
-                self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), gen_coords
+                camera.gen_coords = random.randint(camera.gen_coords - 304 + dude.rect.h + self.rect.h,
+                                                   camera.gen_coords - self.rect.h - 1)
+                self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), camera.gen_coords
         else:
             platforms.remove(self)
             del self
@@ -243,11 +247,11 @@ class PlatformSpring(Platform):
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self, arg=False):
-        global gen_coords
         if not arg:
             if self.rect.y > height:
-                gen_coords = random.randint(gen_coords - 304 + dude.rect.h + self.rect.h, gen_coords - self.rect.h - 1)
-                self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), gen_coords
+                camera.gen_coords = random.randint(camera.gen_coords - 304 + dude.rect.h + self.rect.h,
+                                                   camera.gen_coords - self.rect.h - 1)
+                self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), camera.gen_coords
         else:
             dude.vertikal_speed = -30
             dude.spring = True
@@ -267,12 +271,12 @@ class PlatformMove(Platform):
         self.monster = None
 
     def update(self, arg=False):
-        global gen_coords
         if not arg:
             if self.rect.y > height:
                 all_sprites.remove(self.monster)
-                gen_coords = random.randint(gen_coords - 304 + dude.rect.h + self.rect.h, gen_coords - self.rect.h - 1)
-                self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), gen_coords
+                camera.gen_coords = random.randint(camera.gen_coords - 304 + dude.rect.h + self.rect.h,
+                                                   camera.gen_coords - self.rect.h - 1)
+                self.rect.x, self.rect.y = random.randint(0, width - self.rect.w), camera.gen_coords
 
                 if monster_random() and self.monster is None:
                     self.monster = Monster(self)
@@ -357,8 +361,6 @@ class Doodle(pygame.sprite.Sprite):
         self.motion = None
 
     def update(self, *args):
-        global gen_coords
-
         if args and args[0].type == pygame.MOUSEBUTTONDOWN:  # выстрел
             self.shoot(args[0].pos)
 
@@ -396,7 +398,7 @@ class Doodle(pygame.sprite.Sprite):
         if camera.dy - self.rect.y > 324:   # движение камеры
             self.delta = camera.dy - self.rect.y
             camera.update(self)
-            gen_coords += camera.delta
+
         self.movement_vertical()    # вертикальное движение
 
     def movement_vertical(self):    # вертикальное движение
@@ -458,7 +460,7 @@ def start_text_init():
 
 # начальный экран
 def start_screen():
-    generate()
+    camera.gen_coords = generate()
 
     # отрисовка
     all_sprites.draw(screen)
@@ -622,8 +624,8 @@ if __name__ == '__main__':
 
     Background()
     dude = Doodle()
-    start_screen()  # начальная заставка
     camera = Camera()  # создание камеры
+    start_screen()  # начальная заставка
     vstavka = Vstavka()  # создание вставки
 
     #   основной цикл
