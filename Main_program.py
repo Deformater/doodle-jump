@@ -11,7 +11,7 @@ screen = pygame.display.set_mode(size)
 pygame.display.set_caption('Doodle jump')
 screen.fill((255, 255, 255))
 
-gen_coords = 0
+gen_coords = 0  # переменная для определения позиции последней сгенерированной платформы
 P_RANDOM = [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2]   # массив для выбора типа платформы
 MONSTER = ["Monster_1.png", "Monster_2.png", "Monster_3.png", "Monster_4.png"]  # массив с картинками для монстров
 clock = pygame.time.Clock()
@@ -33,6 +33,7 @@ def load_image(name, colorkey=None):
         if colorkey == -1:
             colorkey = image.get_at((0, 0))
         image.set_colorkey(colorkey)
+
     else:
         image = image.convert_alpha()
 
@@ -47,10 +48,13 @@ def monster_random():
 # генерация платформ
 def generate():
     global gen_coords
+
     eczemplar = Platform(width // 2, height - 25)
     gen_coords = height - 26
+
     for i in range(random.randint(14, 18)):
-        gen_coords = random.randint(gen_coords - 304 + dude.rect.h + eczemplar.rect.h, gen_coords - eczemplar.rect.h - 1)
+        gen_coords = random.randint(gen_coords - 304 + dude.rect.h + eczemplar.rect.h,
+                                    gen_coords - eczemplar.rect.h - 1)
         eczemplar = PLATFORM[random.choice(P_RANDOM)](random.randint(0, width - eczemplar.rect.w), gen_coords)
 
 
@@ -101,6 +105,7 @@ class Score(pygame.sprite.Sprite):
         self.myFont.bold = True
         self.fontImage = self.myFont.render(str(0), True, (0, 0, 0))
         screen.blit(self.fontImage, (10, 5))
+
         self.score = 0
 
     def update(self, *args):
@@ -233,8 +238,8 @@ class PlatformSpring(Platform):
 
     def __init__(self, x, y):
         super().__init__(x, y)
+
         self.image = PlatformSpring.image
-        # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self, arg=False):
@@ -254,9 +259,10 @@ class PlatformMove(Platform):
 
     def __init__(self, x, y):
         super().__init__(x, y)
+
         self.image = PlatformMove.image
-        # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
+
         self.speed = 3
         self.monster = None
 
@@ -290,10 +296,11 @@ class Shell(pygame.sprite.Sprite):
         super().__init__(shells)
         self.image = Shell.image
         self.rect = self.image.get_rect()
-        # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
+
         self.rect.x = dude.rect.x + dude.rect[2] // 2 - self.rect.w
         self.rect.y = dude.rect.y
+
         self.new_x, self.new_y = event[0] - self.rect.w // 2, event[1] - self.rect.h // 2
         self.old_x, self.old_y = self.rect.x, self.rect.y
 
