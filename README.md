@@ -2,6 +2,18 @@
 
 This is my classic doodle jump interpretation on Pygame2
 
+## Getting started
+
+Just use this in bash 
+    
+    python -m venv venv
+    
+    venv/bin/ativate
+    
+    pip install -r requirements.txt
+
+## Under the hood
+
 ### Gameplay fiches:
 - platform jumping
 - monster shooting
