@@ -21,4 +21,3 @@
 - class inheritance
 - function
 - text files
-
